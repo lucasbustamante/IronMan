@@ -1,8 +1,10 @@
 #define LED_PIN 2  // Substitua pelo pino correto do seu ESP32-C3 Mini
 
 // Variáveis para controle do brilho
-int brightness = 0;      // Brilho inicial
-int fadeAmount = 5;      // Incremento/decremento do brilho
+int brightness = 160;   // Brilho inicial (mínimo ajustado para 100)
+int fadeAmount = 1;     // Incremento/decremento do brilho
+const int minBrightness = 160; // Limite mínimo do brilho
+const int maxBrightness = 255; // Limite máximo do brilho
 
 void setup() {
   pinMode(LED_PIN, OUTPUT); // Configura o pino como saída
@@ -10,7 +12,7 @@ void setup() {
 
 void loop() {
   // Calcula o tempo para o LED ficar ligado
-  int onTime = map(brightness, 35, 255, 100, 10000); // Ajuste o máximo se necessário
+  int onTime = map(brightness, minBrightness, maxBrightness, 100, 10000);
   // Calcula o tempo para o LED ficar desligado
   int offTime = 10000 - onTime;
 
@@ -26,7 +28,7 @@ void loop() {
   brightness += fadeAmount;
 
   // Inverte a direção do ajuste ao atingir os limites
-  if (brightness <= 0 || brightness >= 255) {
+  if (brightness <= minBrightness || brightness >= maxBrightness) {
     fadeAmount = -fadeAmount;
   }
 

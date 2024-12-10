@@ -11,13 +11,20 @@ Servo servo2;
 bool isUp = false;               // Estado atual dos servos
 bool lastButtonState = LOW;      // Último estado do botão
 
+// Parâmetros para controle do movimento
+const int movementDuration = 500; // Duração do movimento em milissegundos (mais rápido)
+int startPos1, endPos1;            // Posições inicial e final do Servo 1
+int startPos2, endPos2;            // Posições inicial e final do Servo 2
+unsigned long movementStartTime;   // Momento do início do movimento
+bool moving = false;               // Indicador de movimento em andamento
+
 void setup() {
   pinMode(buttonPin, INPUT_PULLDOWN); // Configura o botão como entrada com PULLDOWN
   servo1.attach(servo1Pin);          // Anexa o servo 1
   servo2.attach(servo2Pin);          // Anexa o servo 2
 
-  servo1.write(0);                   // Servo 1 na posição inicial
-  servo2.write(180);                 // Servo 2 na posição inicial oposta
+  servo1.write(40);                   // Servo 1 na posição inicial
+  servo2.write(140);                 // Servo 2 na posição inicial oposta
 
   Serial.begin(115200);              // Inicia o monitor serial
 }
@@ -25,31 +32,51 @@ void setup() {
 void loop() {
   bool currentButtonState = digitalRead(buttonPin); // Lê o estado do botão
 
-  if (currentButtonState == HIGH && lastButtonState == LOW) {
-    // Alterna o estado dos servos
+  if (currentButtonState == HIGH && lastButtonState == LOW && !moving) {
+    // Alterna o estado dos servos e define as posições de destino
     isUp = !isUp;
+    startPos1 = servo1.read();
+    startPos2 = servo2.read();
 
     if (isUp) {
-      moveServos(0,120); // Move os servos para cima (Servo1: 0->90, Servo2: 180->90)
+      endPos1 = 120;
+      endPos2 = 60; // 180 - 120
       Serial.println("Subindo");
     } else {
-      moveServos(120, 0); // Move os servos para baixo (Servo1: 90->0, Servo2: 90->180)
+      endPos1 = 40;
+      endPos2 = 140;
       Serial.println("Descendo");
     }
 
-    delay(1000); // Pequeno atraso para evitar múltiplos acionamentos
+    movementStartTime = millis();
+    moving = true; // Inicia o movimento
   }
 
   lastButtonState = currentButtonState; // Atualiza o estado do botão
+
+  // Atualiza os servos enquanto o movimento está em andamento
+  if (moving) {
+    updateServoPositions();
+  }
 }
 
-// Função para mover os servos de forma sincronizada
-void moveServos(int startPos, int endPos) {
-  int step = (startPos < endPos) ? 1 : -1; // Define a direção do movimento
+// Função para atualizar as posições dos servos de forma sincronizada
+void updateServoPositions() {
+  unsigned long elapsedTime = millis() - movementStartTime;
 
-  for (int pos = startPos; pos != endPos + step; pos += step) {
-    servo1.write(pos);            // Define a posição do Servo 1
-    servo2.write(180 - pos);      // Define a posição espelhada do Servo 2
-    delay(5);                     // Ajusta a velocidade do movimento
+  if (elapsedTime >= movementDuration) {
+    // Movimento concluído
+    servo1.write(endPos1);
+    servo2.write(endPos2);
+    moving = false;
+    return;
   }
+
+  // Calcula a nova posição com base no tempo decorrido
+  float progress = (float)elapsedTime / movementDuration;
+  int newPos1 = startPos1 + (endPos1 - startPos1) * progress;
+  int newPos2 = startPos2 + (endPos2 - startPos2) * progress;
+
+  servo1.write(newPos1);
+  servo2.write(newPos2);
 }

@@ -1,9 +1,9 @@
 #include <ESP32Servo.h>
 
 // Pinos do botão e servos
-const int servo1Pin = 27;
-const int servo2Pin = 32;
-const int buttonPin = 25;
+const int servo1Pin = 5;
+const int servo2Pin = 6;
+const int buttonPin = 7;
 
 Servo servo1;
 Servo servo2;
@@ -12,7 +12,7 @@ bool isUp = false;               // Estado atual dos servos
 bool lastButtonState = LOW;      // Último estado do botão
 
 // Parâmetros para controle do movimento
-const int movementDuration = 500; // Duração do movimento em milissegundos (mais rápido)
+const int movementDuration = 300; 
 int startPos1, endPos1;            // Posições inicial e final do Servo 1
 int startPos2, endPos2;            // Posições inicial e final do Servo 2
 unsigned long movementStartTime;   // Momento do início do movimento
@@ -23,8 +23,8 @@ void setup() {
   servo1.attach(servo1Pin);          // Anexa o servo 1
   servo2.attach(servo2Pin);          // Anexa o servo 2
 
-  servo1.write(40);                   // Servo 1 na posição inicial
-  servo2.write(140);                 // Servo 2 na posição inicial oposta
+  servo1.write(30);                   // Servo 1 na posição inicial
+  servo2.write(150);                 // Servo 2 na posição inicial oposta
 
   Serial.begin(115200);              // Inicia o monitor serial
 }
@@ -43,8 +43,8 @@ void loop() {
       endPos2 = 60; // 180 - 120
       Serial.println("Subindo");
     } else {
-      endPos1 = 40;
-      endPos2 = 140;
+      endPos1 = 30;
+      endPos2 = 150;
       Serial.println("Descendo");
     }
 

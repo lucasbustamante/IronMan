@@ -23,8 +23,8 @@ void setup() {
   servo1.attach(servo1Pin);          // Anexa o servo 1
   servo2.attach(servo2Pin);          // Anexa o servo 2
 
-  servo1.write(30);                   // Servo 1 na posição inicial
-  servo2.write(150);                 // Servo 2 na posição inicial oposta
+  servo1.write(25);                   // quanto menor o numero, mais baixo o servo
+  servo2.write(165);                 // quanto maior o numero, mais baixo o servo
 
   Serial.begin(115200);              // Inicia o monitor serial
 }
@@ -39,12 +39,12 @@ void loop() {
     startPos2 = servo2.read();
 
     if (isUp) {
-      endPos1 = 120;
-      endPos2 = 60; // 180 - 120
+      endPos1 = 180;          // quanto maior o numero, mais alto o servo
+      endPos2 = 0;           // quanto menor o numero, mais alto o servo
       Serial.println("Subindo");
     } else {
-      endPos1 = 30;
-      endPos2 = 150;
+      endPos1 = 25;           // quanto menor o numero, mais baixo o servo
+      endPos2 = 165;          // quanto maior o numero, mais baixo o servo
       Serial.println("Descendo");
     }
 

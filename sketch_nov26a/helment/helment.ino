@@ -46,12 +46,12 @@ void loop() {
       endPos1 = 180;          // quanto maior o número, mais alto o servo
       endPos2 = 0;            // quanto menor o número, mais alto o servo
       Serial.println("Subindo");
-      digitalWrite(ledPin, LOW); // Desliga o LED quando os servos estão levantados
+      digitalWrite(ledPin, HIGH); // Desliga o LED quando os servos estão levantados
     } else {
       endPos1 = 25;           // quanto menor o número, mais baixo o servo
       endPos2 = 165;          // quanto maior o número, mais baixo o servo
       Serial.println("Descendo");
-      digitalWrite(ledPin, HIGH); // Liga o LED quando os servos estão abaixados
+      digitalWrite(ledPin, LOW); // Liga o LED quando os servos estão abaixados
     }
 
     movementStartTime = millis();

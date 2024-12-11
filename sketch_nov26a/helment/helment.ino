@@ -17,7 +17,9 @@ const int movementDuration = 300;
 int startPos1, endPos1;            // Posições inicial e final do Servo 1
 int startPos2, endPos2;            // Posições inicial e final do Servo 2
 unsigned long movementStartTime;   // Momento do início do movimento
+unsigned long ledDelayStartTime;   // Momento de início do atraso do LED
 bool moving = false;               // Indicador de movimento em andamento
+bool ledDelayed = false;           // Indicador de atraso do LED
 
 void setup() {
   pinMode(buttonPin, INPUT_PULLDOWN); // Configura o botão como entrada com PULLDOWN
@@ -46,12 +48,13 @@ void loop() {
       endPos1 = 180;          // quanto maior o número, mais alto o servo
       endPos2 = 0;            // quanto menor o número, mais alto o servo
       Serial.println("Subindo");
-      digitalWrite(ledPin, HIGH); // Desliga o LED quando os servos estão levantados
+      digitalWrite(ledPin, HIGH); // Certifique-se de desligar o LED ao subir
+      ledDelayed = false;       // Reseta o atraso do LED
     } else {
       endPos1 = 25;           // quanto menor o número, mais baixo o servo
       endPos2 = 165;          // quanto maior o número, mais baixo o servo
       Serial.println("Descendo");
-      digitalWrite(ledPin, LOW); // Liga o LED quando os servos estão abaixados
+      ledDelayStartTime = 0;  // Reseta o início do atraso
     }
 
     movementStartTime = millis();
@@ -63,6 +66,17 @@ void loop() {
   // Atualiza os servos enquanto o movimento está em andamento
   if (moving) {
     updateServoPositions();
+  }
+
+  // Gerencia o atraso do LED
+  if (!isUp && !moving && !ledDelayed) {
+    if (ledDelayStartTime == 0) {
+      ledDelayStartTime = millis(); // Registra o momento de início do atraso
+    } else if (millis() - ledDelayStartTime >= 100) { // Atraso de 1 segundo
+    ledPulsingEffect();
+      digitalWrite(ledPin, LOW); // Liga o LED após 1 segundo
+      ledDelayed = true;         // Marca que o atraso foi processado
+    }
   }
 }
 
@@ -85,4 +99,15 @@ void updateServoPositions() {
 
   servo1.write(newPos1);
   servo2.write(newPos2);
+}
+
+// Função para criar o efeito de "pulsar" no LED
+void ledPulsingEffect() {
+  for (int i = 0; i < 5; i++) { // Pisca o LED 5 vezes
+    digitalWrite(ledPin, HIGH);
+    delay(110); // Liga por 100 ms
+    digitalWrite(ledPin, LOW);
+    delay(110); // Desliga por 100 ms
+  }
+  digitalWrite(ledPin, HIGH); // Liga o LED de forma constante após o efeito
 }

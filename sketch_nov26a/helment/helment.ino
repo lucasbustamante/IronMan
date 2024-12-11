@@ -1,9 +1,10 @@
 #include <ESP32Servo.h>
 
-// Pinos do botão e servos
+// Pinos do botão, servos e LED
 const int servo1Pin = 5;
 const int servo2Pin = 6;
 const int buttonPin = 7;
+const int ledPin = 4;
 
 Servo servo1;
 Servo servo2;
@@ -20,11 +21,14 @@ bool moving = false;               // Indicador de movimento em andamento
 
 void setup() {
   pinMode(buttonPin, INPUT_PULLDOWN); // Configura o botão como entrada com PULLDOWN
+  pinMode(ledPin, OUTPUT);           // Configura o LED como saída
+  digitalWrite(ledPin, LOW);         // Inicializa o LED como desligado
+
   servo1.attach(servo1Pin);          // Anexa o servo 1
   servo2.attach(servo2Pin);          // Anexa o servo 2
 
-  servo1.write(25);                   // quanto menor o numero, mais baixo o servo
-  servo2.write(165);                 // quanto maior o numero, mais baixo o servo
+  servo1.write(25);                  // Posição inicial do Servo 1
+  servo2.write(165);                 // Posição inicial do Servo 2
 
   Serial.begin(115200);              // Inicia o monitor serial
 }
@@ -39,13 +43,15 @@ void loop() {
     startPos2 = servo2.read();
 
     if (isUp) {
-      endPos1 = 180;          // quanto maior o numero, mais alto o servo
-      endPos2 = 0;           // quanto menor o numero, mais alto o servo
+      endPos1 = 180;          // quanto maior o número, mais alto o servo
+      endPos2 = 0;            // quanto menor o número, mais alto o servo
       Serial.println("Subindo");
+      digitalWrite(ledPin, LOW); // Desliga o LED quando os servos estão levantados
     } else {
-      endPos1 = 25;           // quanto menor o numero, mais baixo o servo
-      endPos2 = 165;          // quanto maior o numero, mais baixo o servo
+      endPos1 = 25;           // quanto menor o número, mais baixo o servo
+      endPos2 = 165;          // quanto maior o número, mais baixo o servo
       Serial.println("Descendo");
+      digitalWrite(ledPin, HIGH); // Liga o LED quando os servos estão abaixados
     }
 
     movementStartTime = millis();

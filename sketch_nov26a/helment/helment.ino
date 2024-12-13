@@ -1,10 +1,12 @@
 #include <ESP32Servo.h>
 
-// Pinos do botão, servos e LED
+// Pinos do botão, servos e LEDs
 const int servo1Pin = 5;
 const int servo2Pin = 6;
 const int buttonPin = 7;
-const int ledPin = 4;
+const int ledPin = 4;     // LED principal
+const int ledUpPin1 = 1;  // LED adicional 1
+const int ledUpPin2 = 20; // LED adicional 2
 
 Servo servo1;
 Servo servo2;
@@ -23,8 +25,13 @@ bool ledDelayed = false;           // Indicador de atraso do LED
 
 void setup() {
   pinMode(buttonPin, INPUT_PULLDOWN); // Configura o botão como entrada com PULLDOWN
-  pinMode(ledPin, OUTPUT);           // Configura o LED como saída
-  digitalWrite(ledPin, LOW);         // Inicializa o LED como desligado
+  pinMode(ledPin, OUTPUT);           // Configura o LED principal como saída
+  pinMode(ledUpPin1, OUTPUT);        // Configura LED adicional 1 como saída
+  pinMode(ledUpPin2, OUTPUT);        // Configura LED adicional 2 como saída
+
+  digitalWrite(ledPin, LOW);         // Inicializa o LED principal como desligado
+  digitalWrite(ledUpPin1, HIGH);      // Inicializa o LED adicional 1 como desligado
+  digitalWrite(ledUpPin2, HIGH);      // Inicializa o LED adicional 2 como desligado
 
   servo1.attach(servo1Pin);          // Anexa o servo 1
   servo2.attach(servo2Pin);          // Anexa o servo 2
@@ -48,12 +55,16 @@ void loop() {
       endPos1 = 180;          // quanto maior o número, mais alto o servo
       endPos2 = 0;            // quanto menor o número, mais alto o servo
       Serial.println("Subindo");
-      digitalWrite(ledPin, HIGH); // Certifique-se de desligar o LED ao subir
+      digitalWrite(ledPin, HIGH);    // Certifique-se de desligar o LED ao subir
+      digitalWrite(ledUpPin1, LOW); // Liga os LEDs adicionais
+      digitalWrite(ledUpPin2, LOW);
       ledDelayed = false;       // Reseta o atraso do LED
     } else {
       endPos1 = 25;           // quanto menor o número, mais baixo o servo
       endPos2 = 165;          // quanto maior o número, mais baixo o servo
       Serial.println("Descendo");
+      digitalWrite(ledUpPin1, HIGH); // Desliga os LEDs adicionais
+      digitalWrite(ledUpPin2, HIGH);
       ledDelayStartTime = 0;  // Reseta o início do atraso
     }
 
@@ -73,7 +84,7 @@ void loop() {
     if (ledDelayStartTime == 0) {
       ledDelayStartTime = millis(); // Registra o momento de início do atraso
     } else if (millis() - ledDelayStartTime >= 100) { // Atraso de 1 segundo
-    ledPulsingEffect();
+      ledPulsingEffect();
       digitalWrite(ledPin, LOW); // Liga o LED após 1 segundo
       ledDelayed = true;         // Marca que o atraso foi processado
     }
@@ -103,7 +114,7 @@ void updateServoPositions() {
 
 // Função para criar o efeito de "pulsar" no LED
 void ledPulsingEffect() {
-  for (int i = 0; i < 5; i++) { // Pisca o LED 5 vezes
+  for (int i = 0; i < 4; i++) { // Pisca o LED 5 vezes
     digitalWrite(ledPin, HIGH);
     delay(110); // Liga por 100 ms
     digitalWrite(ledPin, LOW);

@@ -4,7 +4,7 @@
 const int servo1Pin = 5;
 const int servo2Pin = 6;
 const int buttonPin = 7;
-const int ledPin = 4;     // LED principal
+const int ledPin = 4;     // LED Olhos
 const int ledUpPin1 = 1;  // LED adicional 1
 const int ledUpPin2 = 20; // LED adicional 2
 
@@ -54,15 +54,15 @@ void loop() {
     if (isUp) {
       endPos1 = 180;          // quanto maior o número, mais alto o servo
       endPos2 = 0;            // quanto menor o número, mais alto o servo
-      Serial.println("Subindo");
+      Serial.println("Aberto");
       digitalWrite(ledPin, HIGH);    // Certifique-se de desligar o LED ao subir
-      digitalWrite(ledUpPin1, LOW); // Liga os LEDs adicionais
-      digitalWrite(ledUpPin2, LOW);
+      digitalWrite(ledUpPin1, HIGH); // Liga os LEDs adicionais leds desativado
+      digitalWrite(ledUpPin2, HIGH); //leds desativado 
       ledDelayed = false;       // Reseta o atraso do LED
     } else {
-      endPos1 = 25;           // quanto menor o número, mais baixo o servo
-      endPos2 = 165;          // quanto maior o número, mais baixo o servo
-      Serial.println("Descendo");
+      endPos1 = 10;           // quanto menor o número, mais baixo o servo
+      endPos2 = 170;          // quanto maior o número, mais baixo o servo
+      Serial.println("Fechado");
       digitalWrite(ledUpPin1, HIGH); // Desliga os LEDs adicionais
       digitalWrite(ledUpPin2, HIGH);
       ledDelayStartTime = 0;  // Reseta o início do atraso

@@ -52,16 +52,16 @@ void loop() {
     startPos2 = servo2.read();
 
     if (isUp) {
-      endPos1 = 180;          // quanto maior o número, mais alto o servo
-      endPos2 = 0;            // quanto menor o número, mais alto o servo
+      endPos1 = 175;          // quanto maior o número, mais alto o servo (esquerdo)
+      endPos2 = 5;            // quanto menor o número, mais alto o servo (direito)
       Serial.println("Aberto");
       digitalWrite(ledPin, HIGH);    // Certifique-se de desligar o LED ao subir
       digitalWrite(ledUpPin1, HIGH); // Liga os LEDs adicionais leds desativado
       digitalWrite(ledUpPin2, HIGH); //leds desativado 
       ledDelayed = false;       // Reseta o atraso do LED
     } else {
-      endPos1 = 10;           // quanto menor o número, mais baixo o servo
-      endPos2 = 170;          // quanto maior o número, mais baixo o servo
+      endPos1 = 12;           // quanto menor o número, mais baixo o servo
+      endPos2 = 165;          // quanto maior o número, mais baixo o servo
       Serial.println("Fechado");
       digitalWrite(ledUpPin1, HIGH); // Desliga os LEDs adicionais
       digitalWrite(ledUpPin2, HIGH);
@@ -114,9 +114,9 @@ void updateServoPositions() {
 
 // Função para criar o efeito de "pulsar" no LED
 void ledPulsingEffect() {
-  for (int i = 0; i < 4; i++) { // Pisca o LED 5 vezes
+  for (int i = 0; i < 5; i++) { // Pisca o LED 5 vezes
     digitalWrite(ledPin, HIGH);
-    delay(110); // Liga por 100 ms
+    delay(80); // Liga por 100 ms
     digitalWrite(ledPin, LOW);
     delay(110); // Desliga por 100 ms
   }

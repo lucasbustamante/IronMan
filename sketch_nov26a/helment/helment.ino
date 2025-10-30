@@ -1,6 +1,8 @@
 #include <ESP32Servo.h>
 
+// ===============================
 // Pinos do botão, servos e LEDs
+// ===============================
 const int servo1Pin = 5;
 const int servo2Pin = 6;
 const int buttonPin = 7;
@@ -11,87 +13,105 @@ const int ledUpPin2 = 20; // LED adicional 2
 Servo servo1;
 Servo servo2;
 
+// ===============================
+// Variáveis de estado
+// ===============================
 bool isUp = false;               // Estado atual dos servos
 bool lastButtonState = LOW;      // Último estado do botão
+bool moving = false;             // Indicador de movimento em andamento
+bool ledDelayed = false;         // Indicador de atraso do LED
 
-// Parâmetros para controle do movimento
-const int movementDuration = 300; 
+// ===============================
+// Controle de movimento
+// ===============================
+const int movementDuration = 300;  // Tempo total de movimento (ms)
 int startPos1, endPos1;            // Posições inicial e final do Servo 1
 int startPos2, endPos2;            // Posições inicial e final do Servo 2
 unsigned long movementStartTime;   // Momento do início do movimento
 unsigned long ledDelayStartTime;   // Momento de início do atraso do LED
-bool moving = false;               // Indicador de movimento em andamento
-bool ledDelayed = false;           // Indicador de atraso do LED
 
+// ===============================
+// Setup
+// ===============================
 void setup() {
-  pinMode(buttonPin, INPUT_PULLDOWN); // Configura o botão como entrada com PULLDOWN
-  pinMode(ledPin, OUTPUT);           // Configura o LED principal como saída
-  pinMode(ledUpPin1, OUTPUT);        // Configura LED adicional 1 como saída
-  pinMode(ledUpPin2, OUTPUT);        // Configura LED adicional 2 como saída
+  pinMode(buttonPin, INPUT_PULLDOWN);
+  pinMode(ledPin, OUTPUT);
+  pinMode(ledUpPin1, OUTPUT);
+  pinMode(ledUpPin2, OUTPUT);
 
-  digitalWrite(ledPin, LOW);         // Inicializa o LED principal como desligado
-  digitalWrite(ledUpPin1, HIGH);      // Inicializa o LED adicional 1 como desligado
-  digitalWrite(ledUpPin2, HIGH);      // Inicializa o LED adicional 2 como desligado
+  digitalWrite(ledPin, LOW);
+  digitalWrite(ledUpPin1, HIGH);
+  digitalWrite(ledUpPin2, HIGH);
 
-  servo1.attach(servo1Pin);          // Anexa o servo 1
-  servo2.attach(servo2Pin);          // Anexa o servo 2
+  // Inicializa os servos na posição inicial e depois desliga
+  servo1.attach(servo1Pin);
+  servo2.attach(servo2Pin);
+  servo1.write(25);
+  servo2.write(165);
+  delay(300);
+  servo1.detach();
+  servo2.detach();
 
-  servo1.write(25);                  // Posição inicial do Servo 1
-  servo2.write(165);                 // Posição inicial do Servo 2
-
-  Serial.begin(115200);              // Inicia o monitor serial
+  Serial.begin(115200);
 }
 
+// ===============================
+// Loop principal
+// ===============================
 void loop() {
-  bool currentButtonState = digitalRead(buttonPin); // Lê o estado do botão
+  bool currentButtonState = digitalRead(buttonPin);
 
+  // Detecta toque no botão
   if (currentButtonState == HIGH && lastButtonState == LOW && !moving) {
-    // Alterna o estado dos servos e define as posições de destino
-    isUp = !isUp;
+    isUp = !isUp; // alterna estado
+
+    // Reanexa os servos antes de iniciar o movimento
+    servo1.attach(servo1Pin);
+    servo2.attach(servo2Pin);
     startPos1 = servo1.read();
     startPos2 = servo2.read();
 
     if (isUp) {
-      endPos1 = 175;          // quanto maior o número, mais alto o servo (esquerdo)
-      endPos2 = 5;            // quanto menor o número, mais alto o servo (direito)
+      endPos1 = 175; // quanto maior o número, mais alto o servo (esquerdo)
+      endPos2 = 5;   // quanto menor o número, mais alto o servo (direito)
       Serial.println("Aberto");
-      digitalWrite(ledPin, HIGH);    // Certifique-se de desligar o LED ao subir
-      digitalWrite(ledUpPin1, HIGH); // Liga os LEDs adicionais leds desativado
-      digitalWrite(ledUpPin2, HIGH); //leds desativado 
-      ledDelayed = false;       // Reseta o atraso do LED
-    } else {
-      endPos1 = 12;           // quanto menor o número, mais baixo o servo
-      endPos2 = 165;          // quanto maior o número, mais baixo o servo
-      Serial.println("Fechado");
-      digitalWrite(ledUpPin1, HIGH); // Desliga os LEDs adicionais
+      digitalWrite(ledPin, HIGH);
+      digitalWrite(ledUpPin1, HIGH);
       digitalWrite(ledUpPin2, HIGH);
-      ledDelayStartTime = 0;  // Reseta o início do atraso
+      ledDelayed = false;
+    } else {
+      endPos1 = 12;
+      endPos2 = 165;
+      Serial.println("Fechado");
+      digitalWrite(ledUpPin1, HIGH);
+      digitalWrite(ledUpPin2, HIGH);
+      ledDelayStartTime = 0;
     }
 
     movementStartTime = millis();
-    moving = true; // Inicia o movimento
+    moving = true;
   }
 
-  lastButtonState = currentButtonState; // Atualiza o estado do botão
+  lastButtonState = currentButtonState;
 
-  // Atualiza os servos enquanto o movimento está em andamento
-  if (moving) {
-    updateServoPositions();
-  }
+  // Atualiza os servos se estiver em movimento
+  if (moving) updateServoPositions();
 
-  // Gerencia o atraso do LED
+  // Gerencia atraso do LED após fechar
   if (!isUp && !moving && !ledDelayed) {
     if (ledDelayStartTime == 0) {
-      ledDelayStartTime = millis(); // Registra o momento de início do atraso
-    } else if (millis() - ledDelayStartTime >= 100) { // Atraso de 1 segundo
+      ledDelayStartTime = millis();
+    } else if (millis() - ledDelayStartTime >= 100) {
       ledPulsingEffect();
-      digitalWrite(ledPin, LOW); // Liga o LED após 1 segundo
-      ledDelayed = true;         // Marca que o atraso foi processado
+      digitalWrite(ledPin, LOW);
+      ledDelayed = true;
     }
   }
 }
 
-// Função para atualizar as posições dos servos de forma sincronizada
+// ===============================
+// Função para atualizar servos
+// ===============================
 void updateServoPositions() {
   unsigned long elapsedTime = millis() - movementStartTime;
 
@@ -99,11 +119,17 @@ void updateServoPositions() {
     // Movimento concluído
     servo1.write(endPos1);
     servo2.write(endPos2);
+
+    // Pequeno tempo para estabilizar e depois desligar
+    delay(100);
+    servo1.detach();
+    servo2.detach();
+
     moving = false;
     return;
   }
 
-  // Calcula a nova posição com base no tempo decorrido
+  // Calcula a posição proporcional ao tempo
   float progress = (float)elapsedTime / movementDuration;
   int newPos1 = startPos1 + (endPos1 - startPos1) * progress;
   int newPos2 = startPos2 + (endPos2 - startPos2) * progress;
@@ -112,13 +138,15 @@ void updateServoPositions() {
   servo2.write(newPos2);
 }
 
-// Função para criar o efeito de "pulsar" no LED
+// ===============================
+// Efeito de pulsar no LED
+// ===============================
 void ledPulsingEffect() {
-  for (int i = 0; i < 5; i++) { // Pisca o LED 5 vezes
+  for (int i = 0; i < 5; i++) {
     digitalWrite(ledPin, HIGH);
-    delay(80); // Liga por 100 ms
+    delay(80);
     digitalWrite(ledPin, LOW);
-    delay(110); // Desliga por 100 ms
+    delay(110);
   }
-  digitalWrite(ledPin, HIGH); // Liga o LED de forma constante após o efeito
+  digitalWrite(ledPin, HIGH);
 }
